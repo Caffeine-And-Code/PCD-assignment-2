@@ -2,6 +2,7 @@ package pcd.reactiveprogramming;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import pcd.FSReport;
 
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -14,22 +15,35 @@ public final class FSStatLibReactive implements FSStatLib {
     public Flowable<FSReport> getFSReport(
             String directory,
             long maxFileSize,
-            int numberOfBands) {
+            int numberOfBands,
+            FSStatSession session) {
 
-        return Flowable.defer(() -> {
-            validateParameters(maxFileSize, numberOfBands);
+        return Flowable.defer(() ->
+                generateReports(directory, maxFileSize, numberOfBands, session)
+        ).subscribeOn(Schedulers.io());
+    }
 
-            return scanFileSizes(Path.of(directory))
-                .scan(
-                    FSReport.Empty(numberOfBands),
-                    (report, fileSize) -> report.addFile(
-                            fileSize,
-                            maxFileSize,
-                            numberOfBands
-                    )
-                );
-        })
-        .subscribeOn(Schedulers.io());
+    private Flowable<FSReport> generateReports(
+            String directory,
+            long maxFileSize,
+            int numberOfBands,
+            FSStatSession session) {
+
+        validateParameters(directory, maxFileSize, numberOfBands, session);
+
+        Path root = Path.of(directory);
+        FSReport initialReport = FSReport.Empty(numberOfBands);
+
+        return scanFileSizes(root)
+            .scan(
+                initialReport,
+                (report, fileSize) -> report.addFile(
+                        fileSize,
+                        maxFileSize,
+                        numberOfBands
+                )
+            )
+            .takeUntil(session.cancellationSignal());
     }
 
     private Flowable<Long> scanFileSizes(Path directory) {
@@ -38,7 +52,8 @@ public final class FSStatLibReactive implements FSStatLib {
             paths -> Flowable.fromStream(paths)
                     .filter(this::isRegularFile)
                     .map(Files::size),
-            BaseStream::close
+            BaseStream::close,
+            true
         );
     }
 
@@ -46,10 +61,17 @@ public final class FSStatLibReactive implements FSStatLib {
         return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
     }
 
-    private void validateParameters(long maxFileSize, int numberOfBands) {
-        if (
-            maxFileSize <= 0 || numberOfBands <= 0 || numberOfBands == Integer.MAX_VALUE
-        ) {
+    private void validateParameters(
+            String directory,
+            long maxFileSize,
+            int numberOfBands,
+            FSStatSession session) {
+
+        if (directory == null || directory.isBlank()
+                || maxFileSize <= 0
+                || numberOfBands <= 0
+                || numberOfBands == Integer.MAX_VALUE
+                || session == null) {
             throw new IllegalArgumentException("Invalid parameters");
         }
     }
