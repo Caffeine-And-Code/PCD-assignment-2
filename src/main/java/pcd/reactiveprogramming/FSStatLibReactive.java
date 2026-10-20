@@ -1,7 +1,6 @@
 package pcd.reactiveprogramming;
 
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import java.nio.file.Files;
@@ -12,18 +11,18 @@ import java.util.stream.BaseStream;
 public final class FSStatLibReactive implements FSStatLib {
 
     @Override
-    public Single<FSReport> getFSReport(
+    public Flowable<FSReport> getFSReport(
             String directory,
             long maxFileSize,
             int numberOfBands) {
 
-        return Single.defer(() -> {
+        return Flowable.defer(() -> {
             validateParameters(maxFileSize, numberOfBands);
 
             return scanFileSizes(Path.of(directory))
-                .reduce(
-                    FSReport.empty(numberOfBands),
-                    (report, fileSize) -> report.addSize(
+                .scan(
+                    FSReport.Empty(numberOfBands),
+                    (report, fileSize) -> report.addFile(
                             fileSize,
                             maxFileSize,
                             numberOfBands

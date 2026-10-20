@@ -4,40 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public record FSReport(List<Integer> bandsCount) {
-    public FSReport {
-        bandsCount = List.copyOf(bandsCount);
+public record FSReport(List<Integer> bandsCount, int fileCount)
+{
+    public static FSReport Empty(int numberOfBands){
+        return new FSReport(IntStream.range(0, numberOfBands + 1)
+                .map(i -> 0)
+                .boxed()
+                .toList(), 0);
     }
 
-    public static FSReport empty(int numberOfBands) {
-        return new FSReport(
-                IntStream.rangeClosed(0, numberOfBands)
-                        .map(index -> 0)
-                        .boxed()
-                        .toList()
-        );
-    }
-
-    public int totalFiles() {
-        return bandsCount.stream().mapToInt(Integer::intValue).sum();
-    }
-
-    public FSReport merge(FSReport other) {
-        if (bandsCount.size() != other.bandsCount.size()) {
-            throw new IllegalArgumentException("Both reports must have same size.");
-        }
-
-        return new FSReport(
-                IntStream.range(0, bandsCount.size())
-                        .map(index -> bandsCount.get(index) + other.bandsCount.get(index))
-                        .boxed()
-                        .toList()
-        );
-    }
-
-    private List<Integer> increment(int index) {
-        List<Integer> updated = new ArrayList<>(bandsCount);
-        updated.set(index, updated.get(index) + 1);
+    private List<Integer> increment(int i){
+        List<Integer> updated = new ArrayList<>(this.bandsCount);
+        updated.set(i, updated.get(i) + 1);
         return updated;
     }
 
@@ -59,8 +37,9 @@ public record FSReport(List<Integer> bandsCount) {
         return (int) Math.ceil(size / bandWidth) - 1;
     }
 
-    public FSReport addSize(long size, long maxFileSize, int numberOfBands) {
-        int bandIndex = getBandIndex(size, maxFileSize, numberOfBands);
-        return new FSReport(increment(bandIndex));
+    public FSReport addFile(long size, long maxFileSize, int numberOfBands){
+        return new FSReport(
+                increment(getBandIndex(size, maxFileSize, numberOfBands)), this.fileCount+1
+        );
     }
 }

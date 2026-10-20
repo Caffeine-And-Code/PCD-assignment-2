@@ -16,14 +16,48 @@ class FSStatLibReactiveFeatureTest {
     void scansTestDataAndCountsEveryFileOnce() {
         new FSStatLibReactive()
                 .getFSReport("test-data", 100, 4)
+                .lastOrError()
                 .test()
                 .awaitDone(10, TimeUnit.SECONDS)
                 .assertComplete()
                 .assertNoErrors()
                 .assertValue(report ->
                         report.bandsCount().equals(List.of(3, 2, 2, 2, 1))
-                                && report.totalFiles() == 10
+                                && report.fileCount() == 10
                 );
+    }
+
+    @Test
+    @Timeout(10)
+    void emitsProgressiveReports() {
+        new FSStatLibReactive()
+                .getFSReport("test-data", 100, 4)
+                .test()
+                .awaitDone(10, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors()
+                .assertValueCount(11)
+                .assertValueAt(0, report -> report.fileCount() == 0)
+                .assertValueAt(10, report ->
+                        report.bandsCount().equals(List.of(3, 2, 2, 2, 1))
+                                && report.fileCount() == 10
+                );
+    }
+
+    @Test
+    @Timeout(10)
+    void canStopAReportGeneration() {
+        new FSStatLibReactive()
+                .getFSReport("test-data", 100, 4)
+                .take(3)
+                .test()
+                .awaitDone(10, TimeUnit.SECONDS)
+                .assertComplete()
+                .assertNoErrors()
+                .assertValueCount(3)
+                .assertValueAt(0, report -> report.fileCount() == 0)
+                .assertValueAt(1, report -> report.fileCount() == 1)
+                .assertValueAt(2, report -> report.fileCount() == 2);
     }
 
     @Test
@@ -38,10 +72,11 @@ class FSStatLibReactiveFeatureTest {
         Files.createDirectory(directory);
         Files.write(directory.resolve("file.bin"), new byte[10]);
 
-        report.test()
+        report.lastOrError()
+                .test()
                 .awaitDone(10, TimeUnit.SECONDS)
                 .assertComplete()
                 .assertNoErrors()
-                .assertValue(value -> value.totalFiles() == 1);
+                .assertValue(value -> value.fileCount() == 1);
     }
 }

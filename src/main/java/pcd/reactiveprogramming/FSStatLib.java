@@ -1,9 +1,10 @@
 package pcd.reactiveprogramming;
 
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.Flowable;
 
 public interface FSStatLib {
-    Single<FSReport> getFSReport(
+
+    Flowable<FSReport> getFSReport(
             String directory,
             long maxFileSize,
             int numberOfBands
