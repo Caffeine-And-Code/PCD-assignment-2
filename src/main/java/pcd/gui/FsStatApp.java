@@ -3,31 +3,21 @@ package pcd.gui;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import pcd.asyncprogramming.FSStatLibAsync;
 
-import java.util.function.Consumer;
-
-public class FsStatApp extends Application {
-
-    private static Consumer<FsStatView> onReady = v -> {};
-
-    /**
-     * Launches the GUI. The callback receives the view (on the JavaFX thread)
-     * as soon as it is created, so you can register handlers on it.
-     * Blocks until the application exits (like Application.launch).
-     */
-    public static void launchGui(Consumer<FsStatView> viewReady, String... args) {
-        onReady = viewReady;
-        Application.launch(FsStatApp.class, args);
-    }
+public final class FsStatApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        FsStatView view = new FsStatView();
-        onReady.accept(view);
+        FsStatViewModel viewModel = new FsStatViewModel(new FSStatLibAsync());
+        FsStatView view = new FsStatView(viewModel);
 
         stage.setTitle("FSStat");
         stage.setScene(new Scene(view.getRoot()));
         stage.show();
     }
-}
 
+    public static void launchGui(String... args) {
+        Application.launch(FsStatApp.class, args);
+    }
+}

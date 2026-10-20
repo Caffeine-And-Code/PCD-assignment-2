@@ -7,14 +7,17 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import pcd.gui.FsStatView;
 
-public class ViewLayout {
+public final class ViewLayout {
     private final BorderPane root = new BorderPane();
 
     private final TextField dirField = new TextField();
@@ -33,17 +36,11 @@ public class ViewLayout {
     private final BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
     private final XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-    private FsStatView.StartHandler startHandler = (d, m, n) -> {
-    };
-    private Runnable stopHandler = () -> {
-    };
-
-    public void build(Runnable chooseDirectory, Runnable onStartPressed) {
+    public void build(Runnable chooseDirectory, Runnable onStart, Runnable onStop) {
         dirField.setPromptText("Select a directory…");
         dirField.setEditable(false);
         HBox.setHgrow(dirField, Priority.ALWAYS);
-
-        browseButton.setOnAction(e -> chooseDirectory.run());
+        browseButton.setOnAction(event -> chooseDirectory.run());
 
         maxFsSpinner.setEditable(true);
         maxFsSpinner.setPrefWidth(120);
@@ -51,23 +48,23 @@ public class ViewLayout {
         nbSpinner.setPrefWidth(80);
 
         startButton.setDefaultButton(true);
-        startButton.setOnAction(e -> onStartPressed.run());
-        stopButton.setOnAction(e -> {
-            statusLabel.setText("Stopping…");
-            stopButton.setDisable(true);
-            stopHandler.run();
+        startButton.setOnAction(event -> {
+            maxFsSpinner.increment(0);
+            nbSpinner.increment(0);
+            onStart.run();
         });
+        stopButton.setOnAction(event -> onStop.run());
 
-        HBox dirRow = new HBox(8, new Label("Directory:"), dirField, browseButton);
-        dirRow.setAlignment(Pos.CENTER_LEFT);
+        HBox directoryRow = new HBox(8, new Label("Directory:"), dirField, browseButton);
+        directoryRow.setAlignment(Pos.CENTER_LEFT);
 
-        HBox paramRow = new HBox(8,
+        HBox parameterRow = new HBox(8,
                 new Label("MaxFS (KB):"), maxFsSpinner,
                 new Label("Bands (NB):"), nbSpinner,
                 startButton, stopButton);
-        paramRow.setAlignment(Pos.CENTER_LEFT);
+        parameterRow.setAlignment(Pos.CENTER_LEFT);
 
-        VBox top = new VBox(8, dirRow, paramRow);
+        VBox top = new VBox(8, directoryRow, parameterRow);
         top.setPadding(new Insets(12));
 
         xAxis.setLabel("File size band");
@@ -90,93 +87,41 @@ public class ViewLayout {
         root.setPrefSize(900, 600);
     }
 
-    public void setRunning(boolean isRunning) {
-        startButton.setDisable(isRunning);
-        browseButton.setDisable(isRunning);
-        maxFsSpinner.setDisable(isRunning);
-        nbSpinner.setDisable(isRunning);
-        stopButton.setDisable(!isRunning);
-    }
-
-    public void prepareChart(long maxFS, int nb) {
+    public void prepareChart(long maxFS, int numBands) {
         series.getData().clear();
-
-        long width = Math.max(1, maxFS / nb);
-        for (int i = 0; i < nb; i++) {
-            long lo = i * width;
-            long hi = (i == nb - 1) ? maxFS : (i + 1) * width;
-
-            series.getData().add(new XYChart.Data<>(human(lo) + "–" + human(hi), 0));
+        long width = Math.max(1, maxFS / numBands);
+        for (int i = 0; i < numBands; i++) {
+            long low = i * width;
+            long high = (i == numBands - 1) ? maxFS : (i + 1L) * width;
+            series.getData().add(new XYChart.Data<>(human(low) + "–" + human(high), 0));
         }
-
         series.getData().add(new XYChart.Data<>("> " + human(maxFS), 0));
     }
 
     private static String human(long bytes) {
-        if (bytes < 1024) {
-            return bytes + "B";
-        }
-
+        if (bytes < 1024) return bytes + "B";
         double kiloBytes = bytes / 1024.0;
-        if (kiloBytes < 1024) {
-            return trim(kiloBytes) + "K";
-        }
-
+        if (kiloBytes < 1024) return trim(kiloBytes) + "K";
         double megaBytes = kiloBytes / 1024;
-        if (megaBytes < 1024) {
-            return trim(megaBytes) + "M";
-        }
-
+        if (megaBytes < 1024) return trim(megaBytes) + "M";
         return trim(megaBytes / 1024) + "G";
     }
 
-    private static String trim(double v) {
-        return v == Math.floor(v)
-                ? String.valueOf((long) v)
-                : String.format("%.1f", v);
+    private static String trim(double value) {
+        return value == Math.floor(value)
+                ? String.valueOf((long) value)
+                : String.format("%.1f", value);
     }
 
-    public Parent getRoot() {
-        return root;
-    }
-
-    public void setOnStart(FsStatView.StartHandler h) {
-        this.startHandler = h;
-    }
-
-    public void setOnStop(Runnable h) {
-        this.stopHandler = h;
-    }
-
-    public TextField getDirField() {
-        return dirField;
-    }
-
-    public Spinner<Integer> getMaxFsSpinner() {
-        return maxFsSpinner;
-    }
-
-    public Spinner<Integer> getNbSpinner() {
-        return nbSpinner;
-    }
-
-    public Label getTotalLabel() {
-        return totalLabel;
-    }
-
-    public Label getStatusLabel() {
-        return statusLabel;
-    }
-
-    public ProgressBar getProgress() {
-        return progress;
-    }
-
-    public XYChart.Series<String, Number> getSeries() {
-        return series;
-    }
-
-    public FsStatView.StartHandler getStartHandler() {
-        return startHandler;
-    }
+    public Parent getRoot() { return root; }
+    public TextField getDirField() { return dirField; }
+    public Button getBrowseButton() { return browseButton; }
+    public Spinner<Integer> getMaxFsSpinner() { return maxFsSpinner; }
+    public Spinner<Integer> getNbSpinner() { return nbSpinner; }
+    public Button getStartButton() { return startButton; }
+    public Button getStopButton() { return stopButton; }
+    public Label getTotalLabel() { return totalLabel; }
+    public Label getStatusLabel() { return statusLabel; }
+    public ProgressBar getProgress() { return progress; }
+    public XYChart.Series<String, Number> getSeries() { return series; }
 }
