@@ -135,11 +135,8 @@ public final class FsStatViewModel {
         currentTask.setOnSucceeded(event -> {
             FSReport result = currentTask.getValue();
             report.set(result);
-            long count = result.bandsCount().stream()
-                    .mapToLong(Integer::longValue)
-                    .sum();
-            totalFiles.set(count);
-            totalFilesText.set("Total files: " + count);
+            totalFiles.set(report.getValue().fileCount());
+            totalFilesText.set("Total files: " + report.getValue().fileCount());
             status.set("Completed");
             progress.set(1);
             running.set(false);
@@ -155,6 +152,7 @@ public final class FsStatViewModel {
             progress.set(0);
             running.set(false);
             currentTask = null;
+            this.session.cancel();
         });
 
         currentTask.setOnCancelled(event -> {
@@ -162,6 +160,7 @@ public final class FsStatViewModel {
             progress.set(0);
             running.set(false);
             currentTask = null;
+            this.session.cancel();
         });
 
         Thread worker = new Thread(currentTask, "fsstat-report-worker");
@@ -175,8 +174,8 @@ public final class FsStatViewModel {
     public void stop() {
         if (currentTask != null && running.get()) {
             status.set("Stopping…");
-            this.session.cancel();
             currentTask.cancel(true);
+            this.session.cancel();
         }
     }
 
