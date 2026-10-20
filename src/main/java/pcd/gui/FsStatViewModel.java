@@ -14,7 +14,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import pcd.FSReport;
-import pcd.FSStatLib;
+import pcd.asyncprogramming.FSStatLib;
+import pcd.asyncprogramming.FSStatSession;
 
 import java.io.File;
 
@@ -26,6 +27,7 @@ import java.io.File;
 public final class FsStatViewModel {
 
     private final FSStatLib fsStatLib;
+    private FSStatSession session;
 
     private final StringProperty directory = new SimpleStringProperty("");
     private final IntegerProperty maxFsKb = new SimpleIntegerProperty(1024);
@@ -41,6 +43,7 @@ public final class FsStatViewModel {
 
     public FsStatViewModel(FSStatLib fsStatLib) {
         this.fsStatLib = fsStatLib;
+        this.session = new FSStatSession();
     }
 
     public StringProperty directoryProperty() {
@@ -79,11 +82,16 @@ public final class FsStatViewModel {
         return report;
     }
 
-    /** Starts calculating the report on a JavaFX background Task. */
+    /**
+     * Starts calculating the report on a JavaFX background Task.
+     */
     public void start() {
         if (running.get()) {
             return;
         }
+
+        session = new FSStatSession();
+        session.onUpdate(this.report::setValue);
 
         String path = directory.get() == null ? "" : directory.get().trim();
         if (path.isEmpty()) {
@@ -116,7 +124,11 @@ public final class FsStatViewModel {
             @Override
             protected FSReport call() {
                 return fsStatLib.getFSReport(
-                        selectedDirectory.getAbsolutePath(), maxBytes, bands);
+                        selectedDirectory.getAbsolutePath(),
+                        maxBytes,
+                        bands,
+                        session
+                ).await();
             }
         };
 
@@ -157,10 +169,13 @@ public final class FsStatViewModel {
         worker.start();
     }
 
-    /** Requests cancellation of the current Task, if one is running. */
+    /**
+     * Requests cancellation of the current Task, if one is running.
+     */
     public void stop() {
         if (currentTask != null && running.get()) {
             status.set("Stopping…");
+            this.session.cancel();
             currentTask.cancel(true);
         }
     }
