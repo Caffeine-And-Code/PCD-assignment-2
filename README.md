@@ -32,6 +32,15 @@ A minimal GUI program can be used to show the features of the extended version, 
 
 **[*]** mandatory for students aiming at excellence grade (30 cum laude).
 
+## Build and run
+
+The project requires JDK 21 and is built with Maven:
+
+```shell
+mvn clean package
+mvn exec:java
+```
+
 ### The deliverable
 
 The deliverable must be a zipped folder `Assignment-02`, to be submitted on the course web site, including:  
