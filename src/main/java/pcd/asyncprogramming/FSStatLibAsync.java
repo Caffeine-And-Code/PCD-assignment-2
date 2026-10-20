@@ -39,8 +39,16 @@ public class FSStatLibAsync implements FSStatLib {
             FSReportState state,
             FSStatSession session) {
 
+        if(session.isCanceled()){
+            return Future.succeededFuture();
+        }
+
         return fs.readDir(directory)
             .compose(entries -> {
+
+                if(session.isCanceled()){
+                    return Future.succeededFuture();
+                }
 
                 List<Future<Void>> tasks = new ArrayList<>();
 
@@ -70,9 +78,7 @@ public class FSStatLibAsync implements FSStatLib {
                                         numberOfBands
                                 );
 
-                                session
-                                        .getOnUpdate()
-                                        .ifPresent(onUpdate -> onUpdate.accept(state.report));
+                                session.update(state.report);
                             }
                             return Future.succeededFuture();
                         });
