@@ -1,5 +1,7 @@
 package pcd.asyncprogramming;
 
+import io.vertx.core.Future;
+
 public interface FSStatLib {
-    FSReport getFSReport(String directory, long maxFileSize, int numberOfBands);
+    Future<FSReport> getFSReport(String directory, long maxFileSize, int numberOfBands, FSStatSession session);
 }

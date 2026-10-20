@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public record FSReport(List<Integer> bandsCount)
+public record FSReport(List<Integer> bandsCount, int fileCount)
 {
 
     public static FSReport Empty(int numberOfBands){
-        return new FSReport(IntStream.range(0, numberOfBands+1).map(i -> 0).boxed().toList());
+        return new FSReport(IntStream.range(0, numberOfBands+1).map(i -> 0).boxed().toList(), 0);
     }
 
     public FSReport merge(FSReport other){
@@ -17,7 +17,7 @@ public record FSReport(List<Integer> bandsCount)
         }
 
         return new FSReport(IntStream.range(0, this.bandsCount.size())
-                .map(i -> this.bandsCount.get(i) + other.bandsCount.get(i)).boxed().toList());
+                .map(i -> this.bandsCount.get(i) + other.bandsCount.get(i)).boxed().toList(), this.fileCount);
     }
 
     private List<Integer> increment(int i){
@@ -44,9 +44,9 @@ public record FSReport(List<Integer> bandsCount)
         return (int) Math.ceil(size / bandWidth) - 1;
     }
 
-    public FSReport addSize(long size, long maxFileSize, int numberOfBands){
+    public FSReport addFile(long size, long maxFileSize, int numberOfBands){
         return new FSReport(
-                increment(getBandIndex(size, maxFileSize, numberOfBands))
+                increment(getBandIndex(size, maxFileSize, numberOfBands)), this.fileCount+1
         );
     }
 }

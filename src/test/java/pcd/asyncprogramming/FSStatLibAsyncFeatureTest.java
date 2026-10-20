@@ -2,8 +2,6 @@ package pcd.asyncprogramming;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import pcd.asyncprogramming.FSReport;
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -13,7 +11,8 @@ class FSStatLibAsyncFeatureTest {
     @Test
     @Timeout(10)
     void scansTestDataAndCountsEveryFileOnce() {
-        FSReport report = new FSStatLibAsync().getFSReport("test-data", 100, 4);
+        var lib = new FSStatLibAsync();
+        FSReport report = lib.getFSReport("test-data", 100, 4, new FSStatSession()).await();
 
         assertAll(
                 () -> assertEquals(List.of(3, 2, 2, 2, 1), report.bandsCount()),
