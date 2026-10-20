@@ -2,7 +2,7 @@ package pcd.asyncprogramming;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import pcd.FSReport;
+import pcd.asyncprogramming.FSReport;
 
 import java.util.List;
 

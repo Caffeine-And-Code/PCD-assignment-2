@@ -3,8 +3,6 @@ package pcd.asyncprogramming;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.file.FileSystem;
-import pcd.FSReport;
-import pcd.FSStatLib;
 
 import java.util.ArrayList;
 import java.util.List;

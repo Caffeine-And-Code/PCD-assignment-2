@@ -1,17 +1,18 @@
 package pcd;
 
-import pcd.asyncprogramming.FSStatLibAsync;
+import pcd.reactiveprogramming.FSStatLib;
+import pcd.reactiveprogramming.FSStatLibReactive;
 
 public final class Main {
     private Main() {
     }
 
     public static void main(final String[] args) {
-        FSStatLibAsync lib = new FSStatLibAsync();
-        var res = lib.getFSReport("test-data", 100, 4);
-        for(var e:res.bandsCount()){
-            System.out.println(e);
-        }
-
+        FSStatLib lib = new FSStatLibReactive();
+        lib.getFSReport("test-data", 100, 4)
+                .blockingSubscribe(
+                        report -> report.bandsCount().forEach(System.out::println),
+                        Throwable::printStackTrace
+                );
     }
 }

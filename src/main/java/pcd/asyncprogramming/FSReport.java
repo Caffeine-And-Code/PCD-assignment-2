@@ -1,4 +1,4 @@
-package pcd;
+package pcd.asyncprogramming;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,6 @@ import java.util.stream.IntStream;
 
 public record FSReport(List<Integer> bandsCount)
 {
-    public FSReport {
-        bandsCount = List.copyOf(bandsCount);
-    }
 
     public static FSReport Empty(int numberOfBands){
         return new FSReport(IntStream.range(0, numberOfBands+1).map(i -> 0).boxed().toList());
