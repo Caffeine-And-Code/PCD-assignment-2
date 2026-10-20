@@ -1,0 +1,2 @@
+FSStat test file.
+FSStat t
