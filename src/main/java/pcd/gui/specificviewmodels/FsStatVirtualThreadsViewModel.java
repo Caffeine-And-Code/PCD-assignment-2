@@ -2,9 +2,9 @@ package pcd.gui.specificviewmodels;
 
 import javafx.concurrent.Task;
 import pcd.FSReport;
+import pcd.gui.FsStatViewModel;
 import pcd.virtualthread.FSStatLib;
 import pcd.virtualthread.FSStatSession;
-import pcd.gui.FsStatViewModel;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
