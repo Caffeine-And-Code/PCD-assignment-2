@@ -5,17 +5,19 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import pcd.FSReport;
 import pcd.gui.components.ViewLayout;
+import pcd.gui.enums.LibVersion;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 public final class FsStatView {
 
     private final FsStatViewModel viewModel;
     private final ViewLayout layout = new ViewLayout();
 
-    public FsStatView(FsStatViewModel viewModel) {
+    public FsStatView(FsStatViewModel viewModel, LibVersion version, Consumer<LibVersion> onVersionChange) {
         this.viewModel = viewModel;
-        layout.build(this::chooseDirectory, viewModel::start, viewModel::stop);
+        layout.build(version, onVersionChange, this::chooseDirectory, viewModel::start, viewModel::stop);
         bindControls();
 
         viewModel.runningProperty().addListener((obs, wasRunning, isRunning) -> {
@@ -50,6 +52,7 @@ public final class FsStatView {
         viewModel.numBandsProperty().addListener((obs, oldValue, newValue) ->
                 layout.getNbSpinner().getValueFactory().setValue(newValue.intValue()));
 
+        layout.getVersionCombo().disableProperty().bind(viewModel.runningProperty());
         layout.getStartButton().disableProperty().bind(viewModel.runningProperty());
         layout.getBrowseButton().disableProperty().bind(viewModel.runningProperty());
         layout.getMaxFsSpinner().disableProperty().bind(viewModel.runningProperty());
