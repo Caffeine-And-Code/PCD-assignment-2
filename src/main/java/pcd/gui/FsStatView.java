@@ -84,6 +84,7 @@ public final class FsStatView {
     }
 
     private void renderReport(FSReport report) {
+        this.viewModel.totalFilesText.set("Total files: " + report.fileCount());
         var data = layout.getSeries().getData();
         int n = Math.min(data.size(), report.bandsCount().size());
         for (int i = 0; i < n; i++) {
@@ -95,7 +96,4 @@ public final class FsStatView {
         return layout.getRoot();
     }
 
-    public FsStatViewModel getViewModel() {
-        return viewModel;
-    }
 }
