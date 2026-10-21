@@ -23,9 +23,6 @@ public class FsStatVirtualThreadsViewModel extends FsStatViewModel {
     @Override
     public void onFreshStart(String absolutePathOfDir, long maxBytes, int bands) {
         session = new FSStatSession();
-        // Updates arrive from virtual threads, one per file.
-        // Each is a full snapshot, so only the latest matters:
-        // keep at most one runLater pending to avoid flooding the FX thread.
         AtomicReference<FSReport> latest = new AtomicReference<>();
         session.onUpdate(update -> {
             if (latest.getAndSet(update) == null) {

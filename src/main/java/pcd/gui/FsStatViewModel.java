@@ -54,9 +54,6 @@ public abstract class FsStatViewModel {
 
     public abstract void additionalOnStopSteps();
 
-    /**
-     * Starts calculating the report on a JavaFX background Task.
-     */
     public void start() {
         if (running.get()) {
             return;
@@ -123,9 +120,6 @@ public abstract class FsStatViewModel {
         worker.start();
     }
 
-    /**
-     * Requests cancellation of the current Task, if one is running.
-     */
     public void stop() {
         if (currentTask != null && running.get()) {
             status.set("Stopping…");

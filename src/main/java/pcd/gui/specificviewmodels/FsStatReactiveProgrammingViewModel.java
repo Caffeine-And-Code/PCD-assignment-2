@@ -21,14 +21,12 @@ public class FsStatReactiveProgrammingViewModel extends FsStatViewModel {
     public void onFreshStart(String absolutePathOfDir, long maxBytes, int bands) {
         session = new FSStatSession();
 
-        // Each emission is a full snapshot: keep at most one runLater pending (see virtual threads VM).
         AtomicReference<FSReport> latest = new AtomicReference<>();
 
         currentTask = new Task<>() {
             @Override
             protected FSReport call() {
                 try {
-                    // Block the worker until the stream completes, so the Task lives as long as the scan.
                     return fsStatLib.getFSReport(absolutePathOfDir, maxBytes, bands, session)
                             .doOnNext(update -> {
                                 if (latest.getAndSet(update) == null) {
@@ -42,7 +40,6 @@ public class FsStatReactiveProgrammingViewModel extends FsStatViewModel {
                             })
                             .blockingLast();
                 } catch (RuntimeException e) {
-                    // Task.cancel(true) interrupts blockingLast: that is a stop, not a failure.
                     if (isCancelled()) {
                         return null;
                     }
