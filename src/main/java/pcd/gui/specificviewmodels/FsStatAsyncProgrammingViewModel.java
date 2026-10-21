@@ -6,11 +6,6 @@ import pcd.asyncprogramming.FSStatLib;
 import pcd.asyncprogramming.FSStatSession;
 import pcd.gui.FsStatViewModel;
 
-/**
- * ViewModel for the FSStat JavaFX UI.
- * Holds presentation state and coordinates the background report calculation.
- * It does not depend on JavaFX controls or on the View.
- */
 public final class FsStatAsyncProgrammingViewModel extends FsStatViewModel {
 
     private final FSStatLib fsStatLib;
@@ -40,6 +35,6 @@ public final class FsStatAsyncProgrammingViewModel extends FsStatViewModel {
 
     @Override
     public void additionalOnStopSteps() {
-
+        session.cancel();
     }
 }
