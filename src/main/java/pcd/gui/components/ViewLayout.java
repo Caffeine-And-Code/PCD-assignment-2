@@ -41,7 +41,7 @@ public final class ViewLayout {
         versionCombo.setValue(selectedVersion);
         versionCombo.setOnAction(event -> onVersionChange.accept(versionCombo.getValue()));
 
-        dirField.setPromptText("Select a directory…");
+        dirField.setPromptText("Select a directory...");
         dirField.setEditable(false);
         HBox.setHgrow(dirField, Priority.ALWAYS);
         browseButton.setOnAction(event -> chooseDirectory.run());
@@ -66,7 +66,7 @@ public final class ViewLayout {
 
         HBox parameterRow = new HBox(8,
                 new Label("MaxFS (KB):"), maxFsSpinner,
-                new Label("Bands (NB):"), nbSpinner,
+                new Label("Bands Number:"), nbSpinner,
                 startButton, stopButton);
         parameterRow.setAlignment(Pos.CENTER_LEFT);
 

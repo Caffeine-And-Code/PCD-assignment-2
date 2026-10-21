@@ -1,5 +1,6 @@
 package pcd.gui.specificviewmodels;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import pcd.FSReport;
 import pcd.asyncprogramming.FSStatLib;
@@ -18,7 +19,8 @@ public final class FsStatAsyncProgrammingViewModel extends FsStatViewModel {
     @Override
     public void onFreshStart(String absolutePathOfDir, long maxBytes, int bands) {
         session = new FSStatSession();
-        session.onUpdate(this.report::setValue);
+
+        session.onUpdate((report) -> Platform.runLater(() -> this.report.setValue(report)));
 
         currentTask = new Task<>() {
             @Override

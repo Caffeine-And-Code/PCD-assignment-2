@@ -9,7 +9,6 @@ import pcd.virtualthread.FSStatSession;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class FsStatVirtualThreadsViewModel extends FsStatViewModel {
     private final FSStatLib fsStatLib;
@@ -22,28 +21,26 @@ public class FsStatVirtualThreadsViewModel extends FsStatViewModel {
 
     @Override
     public void onFreshStart(String absolutePathOfDir, long maxBytes, int bands) {
-        session = new FSStatSession();
-        AtomicReference<FSReport> latest = new AtomicReference<>();
-        session.onUpdate(update -> {
-            if (latest.getAndSet(update) == null) {
-                Platform.runLater(() -> {
-                    FSReport snapshot = latest.getAndSet(null);
-                    if (running.get() && snapshot != null) {
-                        report.set(snapshot);
-                    }
-                });
+        FSStatSession currentSession = new FSStatSession();
+        session = currentSession;
+        currentSession.onUpdate(update -> Platform.runLater(() -> {
+            if (session != currentSession || !running.get()
+                    || currentTask == null || currentTask.isCancelled()) {
+                return;
             }
-        });
+            report.set(update);
+        }));
 
         currentTask = new Task<>() {
             @Override
             protected FSReport call() throws ExecutionException, InterruptedException {
-                result = fsStatLib.getFSReport(absolutePathOfDir, maxBytes, bands, session);
+                Future<FSReport> currentResult = fsStatLib.getFSReport(
+                        absolutePathOfDir, maxBytes, bands, currentSession);
+                result = currentResult;
                 try {
-                    return result.get();
+                    return currentResult.get();
                 } catch (InterruptedException e) {
-                    // propagate the cancel action to the lib's root future.
-                    result.cancel(true);
+                    currentResult.cancel(true);
                     throw e;
                 }
             }
@@ -52,6 +49,7 @@ public class FsStatVirtualThreadsViewModel extends FsStatViewModel {
 
     @Override
     public void additionalOnStopSteps() {
+        session = null;
         Future<FSReport> current = result;
         if (current != null) {
             current.cancel(true);

@@ -42,10 +42,6 @@ public abstract class FsStatViewModel {
         return totalFilesText;
     }
 
-    public LongProperty totalFilesProperty() {
-        return totalFiles;
-    }
-
     public ObjectProperty<FSReport> reportProperty() {
         return report;
     }
@@ -82,7 +78,7 @@ public abstract class FsStatViewModel {
         report.set(null);
         totalFiles.set(0);
         totalFilesText.set("Total files: 0");
-        status.set("Running…");
+        status.set("Running...");
         running.set(true);
 
         this.onFreshStart(selectedDirectory.getAbsolutePath(), maxBytes, bands);
@@ -122,7 +118,7 @@ public abstract class FsStatViewModel {
 
     public void stop() {
         if (currentTask != null && running.get()) {
-            status.set("Stopping…");
+            status.set("Stopping...");
             currentTask.cancel(true);
             this.additionalOnStopSteps();
         }
