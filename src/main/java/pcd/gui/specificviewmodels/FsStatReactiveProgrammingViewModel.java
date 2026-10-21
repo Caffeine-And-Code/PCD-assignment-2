@@ -21,8 +21,7 @@ public class FsStatReactiveProgrammingViewModel extends FsStatViewModel {
         currentTask = new Task<>() {
             @Override
             protected FSReport call() {
-                fsStatLib
-                        .getFSReport(absolutePathOfDir, maxBytes, bands, session)
+                fsStatLib.getFSReport(absolutePathOfDir, maxBytes, bands, session)
                         .subscribe(
                                 report::setValue,
                                 Throwable::printStackTrace
