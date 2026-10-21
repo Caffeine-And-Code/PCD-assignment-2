@@ -29,7 +29,6 @@ public final class ViewLayout {
 
     private final Label totalLabel = new Label("Total files: –");
     private final Label statusLabel = new Label("Idle");
-    private final ProgressBar progress = new ProgressBar(0);
 
     private final CategoryAxis xAxis = new CategoryAxis();
     private final NumberAxis yAxis = new NumberAxis();
@@ -83,8 +82,7 @@ public final class ViewLayout {
         chart.getData().add(series);
 
         totalLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        progress.setPrefWidth(160);
-        HBox bottom = new HBox(16, totalLabel, statusLabel, progress);
+        HBox bottom = new HBox(16, totalLabel, statusLabel);
         bottom.setAlignment(Pos.CENTER_LEFT);
         bottom.setPadding(new Insets(8, 12, 12, 12));
 
@@ -130,6 +128,5 @@ public final class ViewLayout {
     public Button getStopButton() { return stopButton; }
     public Label getTotalLabel() { return totalLabel; }
     public Label getStatusLabel() { return statusLabel; }
-    public ProgressBar getProgress() { return progress; }
     public XYChart.Series<String, Number> getSeries() { return series; }
 }

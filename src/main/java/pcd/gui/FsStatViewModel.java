@@ -15,7 +15,6 @@ public abstract class FsStatViewModel {
     protected final BooleanProperty running = new SimpleBooleanProperty(false);
     protected final StringProperty status = new SimpleStringProperty("Idle");
     protected final StringProperty totalFilesText = new SimpleStringProperty("Total files: –");
-    protected final DoubleProperty progress = new SimpleDoubleProperty(0);
     protected final LongProperty totalFiles = new SimpleLongProperty(0);
     protected final ObjectProperty<FSReport> report = new SimpleObjectProperty<>();
 
@@ -41,10 +40,6 @@ public abstract class FsStatViewModel {
 
     public StringProperty totalFilesTextProperty() {
         return totalFilesText;
-    }
-
-    public DoubleProperty progressProperty() {
-        return progress;
     }
 
     public LongProperty totalFilesProperty() {
@@ -91,7 +86,6 @@ public abstract class FsStatViewModel {
         totalFiles.set(0);
         totalFilesText.set("Total files: 0");
         status.set("Running…");
-        progress.set(-1); // JavaFX ProgressBar indeterminate progress
         running.set(true);
 
         this.onFreshStart(selectedDirectory.getAbsolutePath(), maxBytes, bands);
@@ -102,7 +96,6 @@ public abstract class FsStatViewModel {
             totalFiles.set(report.getValue().fileCount());
             totalFilesText.set("Total files: " + report.getValue().fileCount());
             status.set("Completed");
-            progress.set(1);
             running.set(false);
             currentTask = null;
         });
@@ -113,7 +106,6 @@ public abstract class FsStatViewModel {
                     ? "Unknown error"
                     : error.getMessage();
             status.set("Error: " + message);
-            progress.set(0);
             running.set(false);
             currentTask = null;
             this.additionalOnStopSteps();
@@ -121,7 +113,6 @@ public abstract class FsStatViewModel {
 
         currentTask.setOnCancelled(event -> {
             status.set("Stopped");
-            progress.set(0);
             running.set(false);
             currentTask = null;
             this.additionalOnStopSteps();
@@ -145,6 +136,5 @@ public abstract class FsStatViewModel {
 
     private void failValidation(String message) {
         status.set(message);
-        progress.set(0);
     }
 }

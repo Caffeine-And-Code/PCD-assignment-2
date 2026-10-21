@@ -60,7 +60,6 @@ public final class FsStatView {
         layout.getStopButton().disableProperty().bind(viewModel.runningProperty().not());
         layout.getStatusLabel().textProperty().bind(viewModel.statusProperty());
         layout.getTotalLabel().textProperty().bind(viewModel.totalFilesTextProperty());
-        layout.getProgress().progressProperty().bind(viewModel.progressProperty());
     }
 
     private void chooseDirectory() {
