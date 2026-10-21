@@ -12,10 +12,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import pcd.gui.enums.LibVersion;
+
+import java.util.function.Consumer;
 
 public final class ViewLayout {
     private final BorderPane root = new BorderPane();
 
+    private final ComboBox<LibVersion> versionCombo = new ComboBox<>();
     private final TextField dirField = new TextField();
     private final Button browseButton = new Button("Browse…");
     private final Spinner<Integer> maxFsSpinner = new Spinner<>(1, 10_000_000, 1024, 128);
@@ -32,7 +36,12 @@ public final class ViewLayout {
     private final BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
     private final XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-    public void build(Runnable chooseDirectory, Runnable onStart, Runnable onStop) {
+    public void build(LibVersion selectedVersion, Consumer<LibVersion> onVersionChange,
+                      Runnable chooseDirectory, Runnable onStart, Runnable onStop) {
+        versionCombo.getItems().setAll(LibVersion.values());
+        versionCombo.setValue(selectedVersion);
+        versionCombo.setOnAction(event -> onVersionChange.accept(versionCombo.getValue()));
+
         dirField.setPromptText("Select a directory…");
         dirField.setEditable(false);
         HBox.setHgrow(dirField, Priority.ALWAYS);
@@ -51,7 +60,9 @@ public final class ViewLayout {
         });
         stopButton.setOnAction(event -> onStop.run());
 
-        HBox directoryRow = new HBox(8, new Label("Directory:"), dirField, browseButton);
+        HBox directoryRow = new HBox(8,
+                new Label("Library:"), versionCombo,
+                new Label("Directory:"), dirField, browseButton);
         directoryRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox parameterRow = new HBox(8,
@@ -110,6 +121,7 @@ public final class ViewLayout {
     }
 
     public Parent getRoot() { return root; }
+    public ComboBox<LibVersion> getVersionCombo() { return versionCombo; }
     public TextField getDirField() { return dirField; }
     public Button getBrowseButton() { return browseButton; }
     public Spinner<Integer> getMaxFsSpinner() { return maxFsSpinner; }
