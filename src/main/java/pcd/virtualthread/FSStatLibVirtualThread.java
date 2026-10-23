@@ -4,6 +4,7 @@ import pcd.FSReport;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class FSStatLibVirtualThread implements FSStatLib {
 
         var directory = Path.of(dirName);
 
-        if (!Files.isDirectory(directory)) {
+        if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
             return;
         }
 
@@ -67,7 +68,7 @@ public class FSStatLibVirtualThread implements FSStatLib {
                         throw new InterruptedException();
                     }
 
-                    if (Files.isDirectory(entry)) {
+                    if (Files.isDirectory(entry, LinkOption.NOFOLLOW_LINKS)) {
 
                         tasks.add(executor.submit(() -> {
                             scanDirectory(
@@ -80,7 +81,7 @@ public class FSStatLibVirtualThread implements FSStatLib {
                             return null;
                         }));
 
-                    } else if (Files.isRegularFile(entry)) {
+                    } else if (Files.isRegularFile(entry, LinkOption.NOFOLLOW_LINKS)) {
 
                         long size = Files.size(entry);
 

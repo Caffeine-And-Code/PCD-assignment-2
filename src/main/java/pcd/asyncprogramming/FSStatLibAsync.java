@@ -28,7 +28,10 @@ public class FSStatLibAsync implements FSStatLib {
     @Override
     public Future<FSReport> getFSReport(String directory, long maxFileSize, int numberOfBands, FSStatSession session) {
         var state = new FSReportState(numberOfBands);
-        return scanDirectory(directory, maxFileSize, numberOfBands, state, session)
+        return fs.lprops(directory)
+                .compose(props -> props.isDirectory()
+                        ? scanDirectory(directory, maxFileSize, numberOfBands, state, session)
+                        : Future.succeededFuture())
                 .map(useless_my_sdk_not_support_underscore -> state.report);
     }
 
